@@ -6,15 +6,134 @@
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    
+        <script>
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            $( document ).ready(function() {
+
+                function startWeb(response){
+                    document.getElementById("name").innerHTML = response.name
+                    document.getElementById("sname").innerHTML = response.sname
+                    document.getElementById("email").innerHTML = response.email
+                    document.getElementById("birth").innerHTML = response.birth
+                    makeNotefic(response.notefication.read, response.notefication.unread) // adding notefications
+                    joinLessons(response.joinLessons)  //  adding joined lessons
+                    createdLessons(response.createdLessons) // adding created lessons
+                }
+
+                function makeNotefic(read, unread){
+                    var readR = read.req.r_r    // Read requested
+                    var readUR = read.unreq.r_un // Read unRequested
+                    var unreadR = unread.unreq.un_un  // UnRead Requested
+                    var unreadUR = unread.req.un_r  //UnRead UnRequested
+
+                    for (i in unreadUR){    // Adding unread Unrequested
+                        var myDiv = document.createElement("div")
+                        myDiv.style.backgroundColor = "red"
+                        myDiv.innerHTML = unreadUR[i]
+                        document.getElementById("notefCenter").appendChild(myDiv)
+                        document.getElementById("notefCenter").appendChild(document.createElement("Br"))
+                    }
+
+                    for (i1 in unreadR){    // Adding unread Requested
+                        var myDiv1 = document.createElement("div")
+                        var UnButAgree = document.createElement("button")
+                        var UnButDecile = document.createElement("button")
+                        myDiv1.style.backgroundColor = "purple"
+                        myDiv1.innerHTML = unreadR[i1]
+                        UnButAgree.innerHTML = "Agree"
+                        UnButDecile.innerHTML = "Decile"
+                        myDiv1.appendChild(UnButAgree)
+                        myDiv1.appendChild(UnButDecile)
+                        document.getElementById("notefCenter").appendChild(myDiv1)
+                        document.getElementById("notefCenter").appendChild(document.createElement("Br"))
+
+                    }
+
+                    for (i2 in readUR){    // Adding Read Unrequested
+                        var myDiv2 = document.createElement("div")
+                        myDiv2.style.backgroundColor = "green"
+                        myDiv2.innerHTML = readUR[i2]
+                        document.getElementById("notefCenter").appendChild(myDiv2)
+                        document.getElementById("notefCenter").appendChild(document.createElement("Br"))
+                    }
+
+                    for (i3 in readR){    // Adding Read Requested
+                        var myDiv3 = document.createElement("div")
+                        var ButAgree = document.createElement("button")
+                        var ButDecile = document.createElement("button")
+                        myDiv3.style.backgroundColor = "#17ff7f"
+                        myDiv3.innerHTML = readR[i3]
+                        ButAgree.innerHTML = "Agree"
+                        ButDecile.innerHTML = "Decile"
+                        myDiv3.appendChild(ButAgree)
+                        myDiv3.appendChild(ButDecile)
+                        document.getElementById("notefCenter").appendChild(myDiv3)
+                        document.getElementById("notefCenter").appendChild(document.createElement("Br"))
+
+                    }
+
+                }
+
+                function joinLessons(ids){
+                    for(i in ids){
+                        lessButt = document.createElement("button")
+                        lessButt.innerHTML = "Lesson " + String(ids[i])
+                        lessButt.style.backgroundColor = "rgb(70 151 209)"
+                        lessButt.onclick = function(){
+                            window.location.href = "/lesson?id=" + String(ids[i]) 
+                        }
+                        document.getElementById("userLessons").appendChild(lessButt)
+                    }
+                }
+
+                function createdLessons(ids){
+                    for(i in ids){
+                        lessButt = document.createElement("button")
+                        lessButt.innerHTML = "Lesson " + String(ids[i])
+                        lessButt.style.backgroundColor = "rgb(70 151 209)"
+                        lessButt.onclick = function(){
+                            window.location.href = "/lesson?id=" + String(ids[i]) 
+                        }
+                        document.getElementById("usersLessons").appendChild(lessButt)
+                    }
+                }
+
+                var myUser;
+                $.post({
+				traditional: true,
+				url: '/getUserInfo',
+				contentType: 'application/json',
+				data: JSON.stringify( {"email" : urlParams.get('email'), "smth" : "a1502"}),
+				dataType: 'json',
+				success: function(response){
+                    console.log(response)
+                    startWeb(response);
+                    document.getElementById("myBody").style.display = "block";
+                }
+			}, function(a){});
+        
+            $( "#regist_button" ).click(function() { });
+        
+        });
+        </script>
+
     </head>
-    <body>
+    <body id="myBody" style="display:  none;">
         <h1>Main Page</h1>
         <div id="userInfo">
             <h3>User Info</h3>
-
+            <h6 id="name"></h6>
+            <h6 id="sname"></h6>
+            <h6 id="email"></h6>
+            <h6 id="birth"></h6>
         </div>
         <div id="userNotefics">
             <h3>Notefications</h3>
+            <div id="notefCenter">
+
+            </div>
         </div>
         <div id="userLessons">
             <h3>Joined lessons</h3>
@@ -22,10 +141,13 @@
         <div id="usersLessons">
             <h3>Created Lessons</h3>
         </div>
+        <br>
+        <h4>Add new lesson</h3>
         <input type="submit" value="Create New Post" id="newPost">
-        <div id="newPostDiv">
+        <div style="display: none;" id="newPostDiv">
             <h3>Create New Div</h3>
         </div>
+        <br>
         <div id="joinLesson">
             <h3>Join to Lesson</h3>
             <input type="text" placeholder="Enter lesson id">
