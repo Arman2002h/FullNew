@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Login</title>
+	<title>Login1</title>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
@@ -10,19 +10,50 @@
 </head>
 <body>
 	<form method="POST" action="/login">
-		<input type="text" name="email" placeholder="email">
-		<input type="password" name="" placeholder="password">
-		<input type="submit" name="" value="Login">
+		<input type="text" name="email" placeholder="email" id="login_email">
+		<input type="password" name="" placeholder="password" id="login_password">
+		<input type="submit" name="" value="Login" id="login_button">
 	</form>
 	<br><br><br>
 	<form>
-		<input type="text" name="" placeholder="name">
-		<input type="text" name="" placeholder="sname">
-		<input type="email" name="" placeholder="email">
-		<input type="text" name="" placeholder="gend">
-		<input type="text" name="" placeholder="birthdat">
-		<input type="password" name="" placeholder="password">
-		<input type="submit" name="" value="Regist">
+		<input type="text" name="" placeholder="name" id="rg_name">
+		<input type="text" name="" placeholder="sname" id="rg_sname">
+		<input type="email" name="" placeholder="email" id="rg_email">
+		<input type="text" name="" placeholder="gend" id="rg_gend">
+		<input type="text" name="" placeholder="birthdat" id="rg_birth">
+		<input type="password" name="" placeholder="password" id="rg_pass">
+		<input type="submit" name="" value="Regist" id="regist_button">
 	</form>
 </body>
+
+	<script>
+		$( "#login_button" ).click(function() {
+			$.post({
+				traditional: true,
+				url: '/login',
+				contentType: 'application/json',
+				data: JSON.stringify( {"email" : document.getElementById("login_email").value, "password" : document.getElementById("login_password").value}),
+				dataType: 'json',
+				success: function(response){}
+			});
+		});
+		$( "#regist_button" ).click(function() {
+			$.post({
+				traditional: true,
+				url: '/registerUser',
+				contentType: 'application/json',
+				data: JSON.stringify( { "name" : document.getElementById("rg_name").value, 
+										"sname" : document.getElementById("rg_sname").value,
+										"rg_email": document.getElementById("rg_email").value,
+										"rg_gend": document.getElementById("rg_gend").value,
+										"rg_birth": document.getElementById("rg_birth").value,
+										"rg_pass": document.getElementById("rg_pass").value
+										
+									}),
+				dataType: 'json',
+				success: function(response){}
+			});
+		});
+	</script>
+
 </html>
