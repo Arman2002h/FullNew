@@ -20,6 +20,22 @@ app.get("/dash", function(req, res){
 	res.sendFile(__dirname+"/index.html")
 });
 
+app.post('/getUserInfo',function(req, res){
+	//console.log(req.body.email)
+	if(req.body.smth == "a1502"){
+		MongoClient.connect(url, function(err, db) {
+			if (err) throw err;
+			var dbo = db.db("mydb");
+			dbo.collection("users").findOne({email: req.body.email}, function(err, result) {
+			if (err) throw err;
+			console.log(result.name);
+			res.end(JSON.stringify(result))
+			db.close();
+			});
+		});
+	}
+  });
+
 app.post("/login", async (req, res) => {
 	console.log(req.body)
 	MongoClient.connect(url, function(err, db) {
