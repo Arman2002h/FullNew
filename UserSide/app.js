@@ -56,6 +56,77 @@ app.post("/login", async (req, res) => {
 		res.sendFile(__dirname+"/login.html")
 });
 
+app.post("/addNewPost",  (req, res) => {
+	var adminId;
+	var postCont = ["titlePost", "topicPost", "maxPost", "callPost", "addPost", "descPost"]
+	var newPostId;
+	var admin;
+	console.log(req.body.titlePost,req.body.maxPost,req.body.descPost,req.body.callPost,req.body.addPost,req.body.topicPost,)
+	MongoClient.connect(url, {poolSize: 10}, function(err, db) {
+		if (err) throw err;
+		var dbo = db.db("mydb");
+		var cursor = dbo.collection('lessons').find();
+		  var query = { email: req.body.admin };
+		  dbo.collection("users").find(query).toArray(function(err, result) {
+		    if (err) throw err;
+		    console.log(result[0]._id);
+		    adminId = result[0]._id
+		    admin = result[0]
+		    console.log(admin)
+		    var lessonObj = {
+				Idadmin: adminId,
+				settings: {
+					tittle: req.body.titlePost,
+					maxStudents: req.body.maxPost,
+					meetingId: "Still no",
+					meetingUrl: "Still no",
+					describtion: req.body.descPost,
+					allCanCall: req.body.callPost,
+					allCanAddPost: req.body.addPost,
+					topic: req.body.topicPost,
+				},
+				joindedUsers: [],
+				pendingUsers: [],
+				onlineUsers: [],
+				lessons: {
+					read: {},
+					task: {},
+				},
+			}
+			dbo.collection("lessons").insertOne(lessonObj, function(err, ress) {
+				if (err) throw err;
+				console.log(ress.insertedId, "Lesson added");
+				console.log(ress.insertedId)
+				newPostId = ress.insertedId
+				deKill(ress.insertedIdn, adminId)
+				db.close();
+			  });
+//admin.createdLessons.push(newPostId)
+console.log(newPostId)
+		  var myquery = { _id: adminId };
+		  var newvalues = { $set: {createdLessons:  ["1", "2", newPostId]} };
+
+
+		    db.close();
+		    
+		  });
+	    
+	    function deKill(a, b){
+	    	console.log("function", a)
+var dbo1 = db.db("mydb");
+	    		dbo1.collection("users").updateOne({ _id: b }, { $set: {createdLessons:  ["1", "2", a]} }, function(err, res) {
+	    	if (err) throw err;
+	   		console.log("1 document updated", newPostId);
+	  	 	db.close();
+	    });
+	}
+
+
+
+	});
+
+
+});
 
 app.post("/registerUser", async (req, res) => {
 
