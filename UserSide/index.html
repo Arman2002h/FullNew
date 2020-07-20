@@ -12,11 +12,15 @@
             
             $( document ).ready(function() {
 
+                var postCont = ["titlePost", "topicPost", "maxPost", "callPost", "addPost", "descPost"]
+                var userEmail;
+
                 function startWeb(response){
                     document.getElementById("name").innerHTML = response.name
                     document.getElementById("sname").innerHTML = response.sname
                     document.getElementById("email").innerHTML = response.email
                     document.getElementById("birth").innerHTML = response.birth
+                    userEmail = response.email
                     makeNotefic(response.notefication.read, response.notefication.unread) // adding notefications
                     joinLessons(response.joinLessons)  //  adding joined lessons
                     createdLessons(response.createdLessons) // adding created lessons
@@ -114,9 +118,54 @@
                 }
 			}, function(a){});
         
-            $( "#regist_button" ).click(function() { });
-        
+            $( "#newPost" ).click(function() {
+
+                document.getElementById("newPostDiv").style.display = "block";
+
+             });
+
+            $( "#discardPost" ).click(function() {
+
+                document.getElementById("newPostDiv").style.display = "none";
+
+             });
+
+            $( "#discardPost" ).click(function() {
+
+                document.getElementById("newPostDiv").style.display = "none";
+
+             });
+
+            $( "#deleteDraft" ).click(function() {
+
+                for(i in postCont){
+                    document.getElementById(postCont[i]).value = "";
+                }
+
+             });
+            
+            $( "#submitPost" ).click(function() {
+
+                $.post({
+                    traditional: true,
+                    url: '/addNewPost',
+                    contentType: 'application/json',
+                    data: JSON.stringify( { titlePost : document.getElementById(postCont[0]).value,
+                                            topicPost : document.getElementById(postCont[1]).value,
+                                            maxPost : document.getElementById(postCont[2]).value,
+                                            callPost : document.getElementById(postCont[3]).value,
+                                            addPost : document.getElementById(postCont[4]).value,
+                                            descPost : document.getElementById(postCont[5]).value,
+                                            "admin" : userEmail,
+                                        }),
+                    dataType: 'json',
+                    success: function(response){}
+                });
+
+             });
         });
+
+
         </script>
 
     </head>
@@ -144,8 +193,19 @@
         <br>
         <h4>Add new lesson</h3>
         <input type="submit" value="Create New Post" id="newPost">
+        <br>
         <div style="display: none;" id="newPostDiv">
-            <h3>Create New Div</h3>
+            <h3>Create New Lesson</h3>
+            <form action="javascript:void(0);">
+                <input type="text" name="" placeholder="title" id="titlePost" required>
+                <input type="text" id="topicPost" name="" placeholder="topic" required>
+                <input type="number" name="" placeholder="max Students" id="maxPost" required>
+                <input type="text" name="" id="callPost" placeholder="all can call" required>
+                <input type="text" id="addPost" name="" placeholder="all can add post" required>
+                <textarea placeholder="Describtion" id="descPost" required></textarea>
+                <input type="submit" name="" data-toggle="modal" data-target="#exampleModalCenter" value="Submit" onclick="document.getElementById('modalPostTitle').innerHTML = document.getElementById('titlePost').value">
+            </form>
+            <input type="submit" data-toggle="modal" data-target="#discardPostModal" name="" value="discard" id="discardPost">
         </div>
         <br>
         <div id="joinLesson">
@@ -154,6 +214,49 @@
             <input type="submit" value="Join">
 
         </div>
+        <br>
         <input id="logout" value="logout" type="submit">
+    
+
+        <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Ready?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <h3 id="modalPostTitle"></h3>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="submitPost">Save changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade" id="discardPostModal" tabindex="-1" role="dialog" aria-labelledby="discardPostModalTitle" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Discard Post</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <h3>Save post in draf or not</h3>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Yes</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="deleteDraft">No</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
     </body>
 </html>
