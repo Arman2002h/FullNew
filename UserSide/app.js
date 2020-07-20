@@ -62,7 +62,7 @@ app.post("/addNewPost",  (req, res) => {
 	var newPostId;
 	var admin;
 	console.log(req.body.titlePost,req.body.maxPost,req.body.descPost,req.body.callPost,req.body.addPost,req.body.topicPost,)
-	MongoClient.connect(url, {poolSize: 10}, function(err, db) {
+	MongoClient.connect(url, {poolSize: 10, bufferMaxEntries: 0, reconnectTries: 5000, useNewUrlParser: true,useUnifiedTopology: true}, function(err, db) {
 		if (err) throw err;
 		var dbo = db.db("mydb");
 		var cursor = dbo.collection('lessons').find();
@@ -98,8 +98,16 @@ app.post("/addNewPost",  (req, res) => {
 				console.log(ress.insertedId, "Lesson added");
 				console.log(ress.insertedId)
 				newPostId = ress.insertedId
-				deKill(ress.insertedIdn, adminId)
-				db.close();
+				//setTimeout(deKill(ress.insertedIdn, adminId), 1000)
+				//deKill(ress.insertedIdn, adminId)
+				//db.close();
+				var a = admin.createdLessons
+				a.push(ress.insertedId)
+				dbo.collection("users").updateOne({ _id: adminId }, { $set: {createdLessons:  a} }, function(err, res) {
+					if (err) throw err;
+					   console.log("1 document updated", newPostId);
+					   db.close();
+				});
 			  });
 //admin.createdLessons.push(newPostId)
 console.log(newPostId)
@@ -107,14 +115,14 @@ console.log(newPostId)
 		  var newvalues = { $set: {createdLessons:  ["1", "2", newPostId]} };
 
 
-		    db.close();
+		    //db.close();
 		    
 		  });
 	    
 	    function deKill(a, b){
-	    	console.log("function", a)
-var dbo1 = db.db("mydb");
-	    		dbo1.collection("users").updateOne({ _id: b }, { $set: {createdLessons:  ["1", "2", a]} }, function(err, res) {
+	    	console.log("function", a, b)
+			//var dbo = db.db("mydb");
+	    	dbo.collection("users").updateOne({ _id: b }, { $set: {createdLessons:  ["1", "2", a]} }, function(err, res) {
 	    	if (err) throw err;
 	   		console.log("1 document updated", newPostId);
 	  	 	db.close();
