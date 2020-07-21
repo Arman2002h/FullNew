@@ -17,6 +17,7 @@ const initializePassport = require('./passport-config')
 const { RSA_PKCS1_OAEP_PADDING } = require('constants');
 const path = require('path');
 var Busboy = require('busboy')
+const fileUpload = require('express-fileupload');
 var MongoClient = require('mongodb').MongoClient;
 var url = "mongodb+srv://sahak12:newdvbt2@cluster0.8lxiu.gcp.mongodb.net/<dbname>?retryWrites=true&w=majority";
 var ObjectId = require('mongodb').ObjectId; 
@@ -53,6 +54,7 @@ app.use(bodyParser.json());
 app.use(express.static('public'))
 app.use(express.urlencoded({ extended: false }))
 app.use(flash())
+app.use(fileUpload());
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -69,6 +71,12 @@ app.get("/", function(req, res){
 app.get('/login', checkNotAuthenticated, (req, res) => {
 	//res.render('login.html')
 	res.sendFile(__dirname+"/login.html")
+  })
+
+
+app.get('/lesson', (req, res) => {
+	//res.render('login.html')
+	res.sendFile(__dirname+"/lesson.html")
   })
 
 app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
@@ -95,14 +103,38 @@ app.post('/getUserInfo1', checkAuthenticated, (req, res) => {
 	res.end(JSON.stringify({name: req.user}))
    });
 
-  app.post('/getUserInfo', checkAuthenticated, (req, res) => {
+app.post('/getUserInfo',  (req, res) => {
 	//console.log(req.body.email)
-	if(req.body.smth == "a1502"){
+	console.log(req.user, "Name")
+	if(req.user){
+		if(req.body.smth == "a1502"){
+			MongoClient.connect(url, function(err, db) {
+				if (err) throw err;
+				var dbo = db.db("mydb");
+				var o_id = new ObjectId(req.user);
+				dbo.collection("users").findOne({_id : o_id}, function(err, result) {
+				if (err) throw err;
+				console.log(result);
+				res.end(JSON.stringify(result))
+				db.close();
+				});
+			});
+		}
+	}
+	else{
+		res.end("null")
+	}
+  });
+
+app.post('/getLessonInfo',  (req, res) => {
+	//console.log(req.body.email)
+	if(req.body.smth == "p1502"){
 		MongoClient.connect(url, function(err, db) {
 			if (err) throw err;
 			var dbo = db.db("mydb");
-			var o_id = new ObjectId(req.user);
-			dbo.collection("users").findOne({_id : o_id}, function(err, result) {
+			var o_id = new ObjectId(req.body.id);
+			console.log(req.body.id)
+			dbo.collection("lessons").findOne({_id : o_id}, function(err, result) {
 			if (err) throw err;
 			console.log(result);
 			res.end(JSON.stringify(result))
@@ -111,7 +143,6 @@ app.post('/getUserInfo1', checkAuthenticated, (req, res) => {
 		});
 	}
   });
-
 
 app.post("/addNewPost",  (req, res) => {
 	var adminId;
@@ -215,11 +246,64 @@ console.log("Fiuckkk")
 		});
 	});
     busboy.on('finish', function() {
-		res.writeHead(200, { 'Connection': 'close' });
+		res.writeHead(200, { 'Connection': 'close' })
 		res.end("Good");
 	  });
     return req.pipe(busboy);   
 });
+
+app.post('/uploadUserImg', checkAuthenticated, (req, res) => {
+	if (!req.files || Object.keys(req.files).length === 0) {
+	  return res.status(400).send('No files were uploaded.');
+	}
+  
+	// The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
+	let sampleFile = req.files.sampleFile;
+	MongoClient.connect(url, function(err, db) {
+		if (err) throw err;
+		var dbo = db.db("mydb");
+		var o_id = new ObjectId(req.user);
+		console.log("HoHeyyy")
+		dbo.collection("users").findOne({_id : o_id}, function(err, result) {
+			sampleFile.mv('public/images/' + result.email + '/a.png', function(err) {
+				if (err)
+				  return res.status(500).send(err);
+			
+				  res.redirect('/dash')
+			  });
+		db.close();
+		});
+	});
+	// Use the mv() method to place the file somewhere on your server
+
+  });
+
+app.post('/uploadLessonImg', checkAuthenticated, (req, res) => {
+	console.log(req.query)
+	if(req.query.smth = "i1502"){
+		if (!req.files || Object.keys(req.files).length === 0) {
+		return res.status(400).send('No files were uploaded.');
+		}
+		let sampleFile = req.files.sampleFile;
+		//console.log('public/images/a' + req.query.id + '/' + (req.query.type == "i") ? "a" : "b" + '.png', 'Simple')
+		if(req.query.type == "i"){
+			sampleFile.mv('public/images/posts/a' + req.query.id + '/a.png', function(err) {
+				if (err)
+				return res.status(500).send(err);
+			
+				res.redirect('/lesson?id=' + req.query.id)
+			});
+		}
+		else{
+			sampleFile.mv('public/images/posts/a' + req.query.id + '/b.png', function(err) {
+				if (err)
+				return res.status(500).send(err);
+			
+				res.redirect('/lesson?id=' + req.query.id)
+			});
+		}
+	}
+  });
 
 app.post("/registerUser",  (req, res) => {
 
