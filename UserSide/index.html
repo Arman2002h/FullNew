@@ -20,7 +20,7 @@
                     document.getElementById("sname").innerHTML = response.sname
                     document.getElementById("email").innerHTML = response.email
                     document.getElementById("birth").innerHTML = response.birth
-                    document.getElementById("userImg").src = "images/" + response.email + "/a.png"
+                    document.getElementById("userImg").src = "images/users/" + response.email + "/a.png"
                     userEmail = response.email
                     makeNotefic(response.notefication.read, response.notefication.unread) // adding notefications
                     joinLessons(response.joinLessons)  //  adding joined lessons
@@ -107,17 +107,17 @@
 
                 var myUser;
                 $.post({
-				traditional: true,
-				url: '/getUserInfo',
-				contentType: 'application/json',
-				data: JSON.stringify( {"email" : urlParams.get('email'), "smth" : "a1502"}),
-				dataType: 'json',
-				success: function(response){
-                    console.log(response)
-                    startWeb(response);
-                    document.getElementById("myBody").style.display = "block";
-                }
-			}, function(a){});
+                  traditional: true,
+                  url: '/getUserInfo',
+                  contentType: 'application/json',
+                  data: JSON.stringify( {"email" : urlParams.get('email'), "smth" : "a1502"}),
+                  dataType: 'json',
+                  success: function(response){
+                              console.log(response)
+                              startWeb(response);
+                              document.getElementById("myBody").style.display = "block";
+                          }
+                }, function(a){});
         
             $( "#newPost" ).click(function() {
 
@@ -172,19 +172,14 @@
     </head>
     <body id="myBody" style="display:  none;">
 
-      <div class="container">
-        <div class="card border-success mt-5">
-            <h1 class="card-header">Upload Image</h1>
-            <div class="card-body">
-                <div class="form-group">
-                    <form action="/fileupload" method="post" enctype="multipart/form-data">
-                        <input class="form-control-file" type="file" accept="image/*" name="photo" >
-                        <input class="btn mt-3" type="submit" value="upload">
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+      <form ref='uploadForm' 
+      id='uploadForm' 
+      action='/uploadUserImg' 
+      method='post' 
+      encType="multipart/form-data">
+        <input type="file" name="sampleFile" />
+        <input type='submit' value='Upload!' />
+    </form>   
         <h1>Main Page</h1>
         <img style="width: 125px;" id="userImg" src="">
         <div id="userInfo">
