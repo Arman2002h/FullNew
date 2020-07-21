@@ -1,0 +1,167 @@
+<html>
+    <head>
+        <title>Lesson</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    
+        <script>
+            const urlParams = new URLSearchParams(window.location.search);
+
+             $( document ).ready(function() { 
+                
+                var userInfo;
+
+                function startWeb(response){
+                    console.log(userInfo)
+                    if(userInfo != null){
+                        if(response.Idadmin == userInfo._id || response.joindedUsers.includes(userInfo._id)){
+                            document.getElementById("isMember").style.display = "block";
+                            document.getElementById("lessonImg").src = "images/posts/a" + response._id + "/a.png";
+                            document.getElementById("lessonWall").src = "images/posts/a" + response._id + "/b.png";
+                            document.getElementById("userTitle").innerHTML = response.settings.tittle;
+                            document.getElementById("userTopic").innerHTML = response.settings.topic;
+                            document.getElementById("userDesc").innerHTML = response.settings.describtion;
+                            if(response.Idadmin == userInfo._id){
+                                var imgForm = document.createElement("FORM");
+                                var imgInp = document.createElement("INPUT")
+                                var imgSub = document.createElement("INPUT")
+                                
+                                var wallForm = document.createElement("FORM");
+                                var wallInp = document.createElement("INPUT")
+                                var wallSub = document.createElement("INPUT")
+                                
+                                imgInp.setAttribute("type", "file")
+                                imgSub.setAttribute("type", "submit")
+                                imgSub.value = "Upload Img"
+                                imgForm.action = "/uploadLessonImg?id=" + response._id + "&type=i&smth=i1502"
+                                imgForm.method = "POST"
+                                imgInp.name = "sampleFile" 
+                                imgForm.enctype = "multipart/form-data"
+                                
+                                wallInp.setAttribute("type", "file")
+                                wallInp.name = "sampleFile"
+                                wallSub.setAttribute("type", "submit")
+                                wallSub.value = "Upload Img"
+                                wallForm.action = "/uploadLessonImg?id=" + response._id + "&type=w&smth=i1502"
+                                wallForm.method = "POST"
+                                wallForm.enctype = "multipart/form-data"
+
+                                imgForm.appendChild(imgInp)
+                                imgForm.appendChild(imgSub)
+
+                                wallForm.appendChild(wallInp)
+                                wallForm.appendChild(wallSub)
+
+                                document.getElementById("editImg").appendChild(imgForm)
+                                document.getElementById("editImg").appendChild(wallForm)
+                                document.getElementById("editImg").style.display = "block"
+                            }
+                        }
+                        else if(response.pendingUsers.includes(userInfo._id)){
+                            document.getElementById("noMember").style.display = "block"
+                            document.getElementById("noMemberInfo").innerHTML = "Your request is pending please, wait"
+                        }
+                        else{
+                            console.log("I`m here")
+                            document.getElementById("noMember").style.display = "block"
+                            document.getElementById("noMemberInfo").innerHTML = "You are not Joined \n Send request"
+                            var butt = document.createElement("INPUT")
+                            var lessonId = document.createElement("INPUT")
+                            lessonId.setAttribute("type", "input")
+                            lessonId.placeholder = "lesson id"
+                            lessonId.id = "reqLessId"
+                            butt.setAttribute("type", "submit");
+                            butt.value = "Send request"
+                            butt.onclick = function(){
+                                if(document.getElementById("reqLessId").value.length < 6){
+                                    alert("Ivaild id")
+                                }
+                                else{
+                                    $.post({
+                                        traditional: true,
+                                        url: '/lessonRequest',
+                                        contentType: 'application/json',
+                                        data: JSON.stringify( {"LessonId" : document.getElementById("reqLessId").value, "joiner" : userInfo._id}),
+                                        dataType: 'json',
+                                        success: function(response){
+                                                    console.log(response)
+                                                    startWeb(response);
+                                                    document.getElementById("myBody").style.display = "block";
+                                                }
+                                        }, function(a){});
+                                }
+                            }
+                            document.getElementById("noMember").appendChild(lessonId)
+                            document.getElementById("noMember").appendChild(butt)
+                            document.getElementById("noMember").style.display = "block";
+                        }
+                    }
+                    else if(userInfo == null){
+                        document.getElementById("noMember").style.display = "block"
+                        document.getElementById("noMemberInfo").innerHTML = "You are not signed, Log in to see lesson"
+                        var butt = document.createElement("INPUT")
+                        butt.setAttribute("type", "submit");
+                        butt.value = "LogIn"
+                        butt.onclick = function(){
+                            window.location.href = "/login"
+                        }
+                        document.getElementById("noMember").appendChild(butt)
+                    }
+                }
+
+
+
+                $.post({
+                    traditional: true,
+                    url: '/getLessonInfo',
+                    contentType: 'application/json',
+                    data: JSON.stringify( {"id" : urlParams.get('id'), "smth" : "p1502"}),
+                    dataType: 'json',
+                    success: function(response){
+                        console.log(response)
+                        $.post({
+                            traditional: true,
+                            url: '/getUserInfo',
+                            contentType: 'application/json',
+                            data: JSON.stringify( {"smth" : "a1502"}),
+                            dataType: 'json',
+                            success: function(response1){
+                                console.log(response1)
+                                userInfo = response1
+                                startWeb(response);
+                            }
+                        }, function(a){});
+                        
+                        document.getElementById("myBody").style.display = "block";
+                    }
+                }, function(a){});
+
+              });
+        </script>
+    </head>
+
+    <body id="myBody" style="display: none;">
+        <div id="isMember" style="display: none;">
+            <h1>Lesson</h1>
+            
+            <img style="width: 500px;" id="lessonWall">
+            <br>
+            <img style="height: 200px;" id="lessonImg">
+            <br>
+            <div id="editImg" style="display: none;">
+
+            </div>
+            <h3>Lesson Info</h3>
+            <h4 id="userTitle"></h4>
+            <h4 id="userTopic"></h4>
+            <h4 id="userDesc"></h4>
+        </div>
+        <div id="noMember" style="display: none;">
+            <h2 id="noMemberInfo">You are not member</h2>
+            
+        </div>
+    </body>
+</html>
